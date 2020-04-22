@@ -1,24 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+
+import Search from "./Components/Search";
+import Definition from "./Components/Definition";
+
+import { fetchOxford } from "./oxford";
+
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 function App() {
+  console.log("Rendering Component...");
+
+  const [word, setWord] = useState("");
+  const [senses, setSenses] = useState(null);
+  const [searching, setSearching] = useState(false);
+  const [err, setErr] = useState(null);
+
+  useEffect(() => {
+    // console.log("Use Effect...");
+    setSenses(null);
+
+    if (word !== "") {
+      fetchOxford(word, setSearching, setSenses, setErr);
+    }
+  }, [word]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h2 style={{ textAlign: "center" }}>ReactJS Oxford Dictionary</h2>
+      <Search word={word} setWord={setWord} setSearching={setSearching} />
+
+      {senses !== null && senses !== undefined ? (
+        <Definition defs={senses} />
+      ) : (
+        searching &&
+        word !== "" && (
+          <CircularProgress
+            style={{ margin: "10px 50px", display: "inline" }}
+          />
+        )
+      )}
+
+      {/* err handling */}
+      <span>
+        {err !== null && !searching && (
+          <h4 style={{ color: "#dd3131" }}>No Definitions found..</h4>
+        )}
+      </span>
     </div>
   );
 }
